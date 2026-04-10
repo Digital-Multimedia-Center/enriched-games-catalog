@@ -1,0 +1,6 @@
+[submodule "catalog-viewer"]
+	path = catalog-viewer
+	url = https://github.com/Digital-Multimedia-Center/catalog-viewer
+[submodule "games-api"]
+	path = games-api
+	url = https://github.com/Digital-Multimedia-Center/games-api
