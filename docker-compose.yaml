@@ -10,14 +10,27 @@ services:
     ports:
       - "27017:27017"
 
+  mongo-express:
+      image: mongo-express
+      restart: always
+      ports:
+        - "8081:8081"
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_URL=mongodb://admin:password@mongodb:27017/?authSource=admin
+      depends_on:
+        - mongodb
+
   catalog-viewer:
     build:
       context: ./catalog-viewer
       dockerfile: Dockerfile
+      args:
+        - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
     ports:
       - "3000:3000"
     environment:
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
       - HOSTNAME=0.0.0.0
     depends_on:
       - mongodb
