@@ -1,6 +1,3 @@
-# assert env vars exist and if it doesnt fail
-#
-
 services:
   mongodb:
     image: mongo:7.0
@@ -35,6 +32,16 @@ services:
       - HOSTNAME=0.0.0.0
     depends_on:
       - mongodb
+
+  admin-panel:
+      build:
+        context: ./admin-panel
+        args:
+          - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
+      ports:
+        - "3001:3000"
+      depends_on:
+        - mongodb
 
   games-api:
     build:
