@@ -23,36 +23,59 @@ services:
   catalog-viewer:
     build:
       context: ./catalog-viewer
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
       args:
         - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
+    profiles: ["web-dev"]
     ports:
       - "3000:3000"
     environment:
       - HOSTNAME=0.0.0.0
     depends_on:
       - mongodb
+    develop:
+      watch:
+        - action: sync
+          path: ./catalog-viewer/
+          target: /app/
+          ignore:
+            - node_modules/
+            - .next/
+            - out/
+        - action: rebuild
+          path: ./catalog-viewer/dockerfile
 
   admin-panel:
       build:
         context: ./admin-panel
+        dockerfile: dockerfile
         args:
           - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
+      profiles: ["web-dev"]
       ports:
         - "3001:3000"
       depends_on:
         - mongodb
+      develop:
+        watch:
+          - action: sync
+            path: ./admin-panel/
+            target: /app/
+            ignore:
+              - node_modules/
+              - .next/
+              - out/
+          - action: rebuild
+            path: ./admin-panel/dockerfile
 
   games-api:
     build:
       context: ./games-api
+    profiles : ["games-microservice"]
     environment:
       - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
-      # put a env in root and then read from env in this file
       - CLIENT_ID=${CLIENT_ID:?IGDB API Client ID needs to be defined in as an environment variable before running}
       - CLIENT_SECRET=${CLIENT_SECRET:?IGDB API Client secret needs to be defined in as an environment variable before running}
-    depends_on:
-      - mongodb
 
 volumes:
   mongo_data:
