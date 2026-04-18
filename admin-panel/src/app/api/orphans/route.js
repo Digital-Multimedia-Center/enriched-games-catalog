@@ -1,6 +1,11 @@
 import { MongoClient } from "mongodb";
 
-export async function GET() {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = 100;
+  const skip = (page - 1) * limit;
+
   const client = await MongoClient.connect(process.env.MONGODB_URI);
   const db = client.db("enriched-game-data");
 
@@ -15,15 +20,13 @@ export async function GET() {
     },
     {
       $match: {
-        match: { $size: 0 }, // Filter for items with no matches in enriched-items
+        match: { $size: 0 },
       },
     },
-    { $limit: 100 },
+    { $skip: skip },
+    { $limit: limit },
   ]).toArray();
 
   await client.close();
   return Response.json(orphans);
 }
-
-
-
