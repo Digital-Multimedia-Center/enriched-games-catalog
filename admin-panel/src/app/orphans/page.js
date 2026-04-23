@@ -10,12 +10,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function OrphansPage() {
   const [orphans, setOrphans] = useState([]);
   const [page, setPage] = useState(1);
+
+  const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({ igdbId: "", platform: "" });
 
   const fetchOrphans = () => {
     fetch(`/api/orphans?page=${page}`)
@@ -26,6 +37,12 @@ export default function OrphansPage() {
   useEffect(() => {
     fetchOrphans();
   }, [page]);
+
+  const handleSave = async () => {
+    await handleIgdbMatch(editingItem._id, formData.igdbId, formData.platform);
+    setEditingItem(null);
+    fetchOrphans();
+  };
 
   return (
     <div className="p-[2.5rem]">
@@ -58,7 +75,14 @@ export default function OrphansPage() {
                     >
                       Ignore
                     </Button>
-                    <Button form={formId} type="submit" size="sm">Edit</Button>
+                    <Button 
+                    size="sm" 
+                    onClick={() => {
+                      setEditingItem(item);
+                    }}
+                    >
+                      Edit
+                    </Button>
                   </TableCell>
                   <TableCell className="font-medium">
                     <a
@@ -109,6 +133,63 @@ export default function OrphansPage() {
           Next
         </Button>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editing: {editingItem?._id}</DialogTitle>
+          </DialogHeader>
+
+          {editingItem && (
+              <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-2 my-2 border">
+                <div>
+                  <span className="text-[10px] font-bold uppercase text-muted-foreground block">Titles</span>
+                    {[...(editingItem.title || []), ...(editingItem.alternative_titles || [])].map((t, i) => (
+                      <p key={i}>{t}</p>
+                    ))}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground block">Platform / Edition</span>
+                    <p className="text-xs text-muted-foreground">
+                      {[...(editingItem.platform || []), ...(editingItem.edition || [])].join(", ") || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground block">Call Number</span>
+                    <p className="font-mono text-xs">{editingItem.callnumber}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="igdbId">IGDB Game ID</Label>
+              <Input
+                id="igdbId"
+                type="number"
+                value={formData.igdbId}
+                onChange={(e) => setFormData({ ...formData, igdbId: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="platform">Platform</Label>
+              <Input
+                id="platform"
+                value={formData.platform}
+                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingItem(null)}>Cancel</Button>
+            <Button onClick={handleSave}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
