@@ -24,11 +24,11 @@ export default function OrphansPage() {
       <table className={styles.table}>
         <thead>
           <tr className={styles.tableHeader}>
+            <th className={styles.th}>Ignore</th>
             <th className={styles.th}>Folio ID</th>
             <th className={styles.th}>Title + Alternative Title</th>
             <th className={styles.th}>Platform + Edition</th>
             <th className={styles.th}>Call Number</th>
-            <th className={styles.th}>Ignore</th>
             <th className={styles.th}>IGDB ID</th>
             <th className={styles.th}>Save</th>
           </tr>
@@ -38,6 +38,16 @@ export default function OrphansPage() {
             const formId = `form-${item._id}`;
             return (
               <tr key={item._id} className={styles.row}>
+                <td>
+                  <button
+                    onClick={async () => {
+                      await markIgnored(item._id, true);
+                      fetchOrphans();
+                    }}
+                  >
+                    Ignore
+                  </button>
+                </td>
                 <td className={styles.td}>
                   <a href={`https://catalog.lib.msu.edu/Record/${item._id}`} target="_blank">{item._id}</a>
                 </td>
@@ -52,31 +62,6 @@ export default function OrphansPage() {
                   </ul>
                 </td>
                 <td className={`${styles.td} ${styles.callNumber}`}>{item.callnumber}</td>
-
-                {/* LOGIC STARTS HERE */}
-                <td className={styles.td}>
-                  <form 
-                    id={formId} 
-                    action={async (formData) => {
-                      const ignore = formData.get("ignore") === "on";
-                      const igdbId = formData.get("igdbId").trim();
-
-                      // Validation: Both provided
-                      if (ignore && igdbId) {
-                        return alert("Error: You cannot ignore an item AND provide an IGDB ID at the same time.");
-                      }
-
-                      if (ignore) {
-                        const res = await markIgnored(item._id, true);
-                        if (res.success) fetchOrphans();
-                      } else {
-                        const res = await markIgnored(item._id, false);
-                        if (res.success) fetchOrphans();
-                      }
-                    }}
-                  />
-                  <input form={formId} name="ignore" type="checkbox" defaultChecked={!!item.ignore} />
-                </td>
                 <td className={styles.td}>
                   <input form={formId} name="igdbId" type="text" placeholder="Enter ID..." />
                 </td>
