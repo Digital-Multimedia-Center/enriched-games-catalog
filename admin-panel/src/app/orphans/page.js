@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import styles from "./orphansPage.module.css";
 import { markIgnored } from "../lib/mongodb.js";
 
 import {
@@ -29,20 +28,18 @@ export default function OrphansPage() {
   }, [page]);
 
   return (
-    <div className={styles.container}>
+    <div className="p-[2.5rem]">
       <h1 className="text-2xl font-bold mb-6">Orphaned DMC Entries</h1>
 
       <div className="rounded-md border">
-        <Table>
+        <Table className="table-fixed w-full">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20">Ignore</TableHead>
-              <TableHead>Folio ID</TableHead>
-              <TableHead>Title + Alternative Title</TableHead>
-              <TableHead>Platform + Edition</TableHead>
-              <TableHead>Call Number</TableHead>
-              <TableHead>IGDB ID</TableHead>
-              <TableHead className="text-right">Save</TableHead>
+              <TableHead className="w-[5vw]">Actions</TableHead>
+              <TableHead className="w-[10vw]">Folio ID</TableHead>
+              <TableHead className="w-[40vw]">Title + Alternative Title</TableHead>
+              <TableHead className="w-[10vw]">Platform + Edition</TableHead>
+              <TableHead className="w-[10vw]">Call Number</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -61,6 +58,7 @@ export default function OrphansPage() {
                     >
                       Ignore
                     </Button>
+                    <Button form={formId} type="submit" size="sm">Edit</Button>
                   </TableCell>
                   <TableCell className="font-medium">
                     <a
@@ -74,7 +72,7 @@ export default function OrphansPage() {
                   <TableCell>
                     <ul className="list-disc list-inside text-sm">
                       {[...(item.title || []), ...(item.alternative_titles || [])].map((t, i) => (
-                        <li key={i}>{t}</li>
+                        <li key={i} className="truncate">{t}</li>
                       ))}
                     </ul>
                   </TableCell>
@@ -85,21 +83,7 @@ export default function OrphansPage() {
                       ))}
                     </ul>
                   </TableCell>
-                  <TableCell className="font-mono text-xs">{item.callnumber}</TableCell>
-                  <TableCell>
-                    <Input
-                      form={formId}
-                      name="igdbId"
-                      type="text"
-                      placeholder="ID..."
-                      className="w-32"
-                    />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button form={formId} type="submit" size="sm">
-                      Save
-                    </Button>
-                  </TableCell>
+                  <TableCell className="font-mono text-xs truncate">{item.callnumber}</TableCell>
                 </TableRow>
               );
             })}
