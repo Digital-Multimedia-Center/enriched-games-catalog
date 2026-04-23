@@ -1,7 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
 import styles from "./orphansPage.module.css";
-import { markIgnored, handleIgdbMatch } from "../lib/mongodb.js";
+import { markIgnored } from "../lib/mongodb.js";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function OrphansPage() {
   const [orphans, setOrphans] = useState([]);
@@ -19,76 +30,100 @@ export default function OrphansPage() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Orphaned DMC Entries</h1>
-      
-      <table className={styles.table}>
-        <thead>
-          <tr className={styles.tableHeader}>
-            <th className={styles.th}>Ignore</th>
-            <th className={styles.th}>Folio ID</th>
-            <th className={styles.th}>Title + Alternative Title</th>
-            <th className={styles.th}>Platform + Edition</th>
-            <th className={styles.th}>Call Number</th>
-            <th className={styles.th}>IGDB ID</th>
-            <th className={styles.th}>Save</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orphans.map((item) => {
-            const formId = `form-${item._id}`;
-            return (
-              <tr key={item._id} className={styles.row}>
-                <td>
-                  <button
-                    onClick={async () => {
-                      await markIgnored(item._id, true);
-                      fetchOrphans();
-                    }}
-                  >
-                    Ignore
-                  </button>
-                </td>
-                <td className={styles.td}>
-                  <a href={`https://catalog.lib.msu.edu/Record/${item._id}`} target="_blank">{item._id}</a>
-                </td>
-                <td className={styles.td}>
-                  <ul>
-                    {[...(item.title || []), ...(item.alternative_titles || [])].map((t, i) => <li key={i}>{t}</li>)}
-                  </ul>
-                </td>
-                <td className={styles.td}>
-                  <ul>
-                    {[...(item.platform || []), ...(item.edition || [])].map((p, i) => <li key={i}>{p}</li>)}
-                  </ul>
-                </td>
-                <td className={`${styles.td} ${styles.callNumber}`}>{item.callnumber}</td>
-                <td className={styles.td}>
-                  <input form={formId} name="igdbId" type="text" placeholder="Enter ID..." />
-                </td>
-                <td className={styles.td}>
-                  <button form={formId} type="submit" className={styles.button}>save</button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <h1 className="text-2xl font-bold mb-6">Orphaned DMC Entries</h1>
 
-      <div className={styles.pagination}>
-        <button 
-          className={styles.button} 
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-20">Ignore</TableHead>
+              <TableHead>Folio ID</TableHead>
+              <TableHead>Title + Alternative Title</TableHead>
+              <TableHead>Platform + Edition</TableHead>
+              <TableHead>Call Number</TableHead>
+              <TableHead>IGDB ID</TableHead>
+              <TableHead className="text-right">Save</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orphans.map((item) => {
+              const formId = `form-${item._id}`;
+              return (
+                <TableRow key={item._id}>
+                  <TableCell>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={async () => {
+                        await markIgnored(item._id, true);
+                        fetchOrphans();
+                      }}
+                    >
+                      Ignore
+                    </Button>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <a
+                      href={`https://catalog.lib.msu.edu/Record/${item._id}`}
+                      target="_blank"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {item._id}
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    <ul className="list-disc list-inside text-sm">
+                      {[...(item.title || []), ...(item.alternative_titles || [])].map((t, i) => (
+                        <li key={i}>{t}</li>
+                      ))}
+                    </ul>
+                  </TableCell>
+                  <TableCell>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {[...(item.platform || []), ...(item.edition || [])].map((p, i) => (
+                        <li key={i}>{p}</li>
+                      ))}
+                    </ul>
+                  </TableCell>
+                  <TableCell className="font-mono text-xs">{item.callnumber}</TableCell>
+                  <TableCell>
+                    <Input
+                      form={formId}
+                      name="igdbId"
+                      type="text"
+                      placeholder="ID..."
+                      className="w-32"
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button form={formId} type="submit" size="sm">
+                      Save
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex items-center justify-center space-x-4 py-4">
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
         >
           Previous
-        </button>
-        <span>Page {page}</span>
-        <button 
-          className={styles.button} 
+        </Button>
+        <span className="text-sm font-medium">Page {page}</span>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => setPage((p) => p + 1)}
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );
