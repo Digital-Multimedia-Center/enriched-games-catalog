@@ -51,6 +51,8 @@ services:
         dockerfile: dockerfile
         args:
           - MONGODB_URI=mongodb://admin:password@mongodb:27017/games_db?authSource=admin
+          - CLIENT_ID=${CLIENT_ID:?IGDB API Client ID needs to be defined in as an environment variable before running}
+          - CLIENT_SECRET=${CLIENT_SECRET:?IGDB API Client secret needs to be defined in as an environment variable before running}
       profiles: ["web-dev"]
       ports:
         - "3001:3000"
