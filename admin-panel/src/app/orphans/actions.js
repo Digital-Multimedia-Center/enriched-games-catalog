@@ -1,6 +1,7 @@
 'use server';
 
 import { fetchGameFromIGDB } from '@/lib/igdb';
+import { clientPromise } from "@/lib/mongodb-client";
 
 /**
  * Server Action to be called from the UI.
@@ -21,5 +22,24 @@ export async function getGameById(gameId) {
     return { success: true, data: gameData };
   } catch (error) {
     return { error: error.message || "An unexpected error occurred" };
+  }
+}
+
+export async function searchPlatforms(query) {
+  if (!query || query.length < 2) return { success: true, platforms: [] };
+
+  try {
+    const client = await clientPromise;
+    const db = client.db("enriched-game-data");
+    
+    // Find up to 5 matching platforms
+    const platforms = await db.collection("platform-data")
+      .find({ name: { $regex: query, $options: 'i' } })
+      .limit(5)
+      .toArray();
+
+    return { success: true, platforms: platforms.map(p => ({ id: p._id, name: p.name })) };
+  } catch (error) {
+    return { error: "Failed to search platforms" };
   }
 }
