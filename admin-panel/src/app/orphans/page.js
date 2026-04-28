@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { markIgnored } from "../lib/mongodb.js";
+import { markIgnored } from "@/lib/mongodb.js";
 
 import {
   Table,
@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { getGameById } from "./actions.js";
+
 export default function OrphansPage() {
   const [orphans, setOrphans] = useState([]);
   const [page, setPage] = useState(1);
@@ -39,7 +41,10 @@ export default function OrphansPage() {
   }, [page]);
 
   const handleSave = async () => {
-    await handleIgdbMatch(editingItem._id, formData.igdbId, formData.platform);
+    // await handleIgdbMatch(editingItem._id, formData.igdbId, formData.platform);
+      getGameById(formData.igdbId).then(data => {
+      console.log("API Connection Success:", JSON.stringify(data, null, 2));
+    });
     setEditingItem(null);
     fetchOrphans();
   };
