@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { getGameById, searchPlatforms } from "./actions.js";
+import { getGameById, searchPlatforms, connectFolioToIgdb } from "./actions.js";
 
 export default function OrphansPage() {
   const [orphans, setOrphans] = useState([]);
@@ -45,9 +45,22 @@ export default function OrphansPage() {
   }, [page]);
 
   const handleSave = async () => {
-    console.log("do work on database");
-    setEditingItem(null);
-    fetchOrphans();
+    if (!igdbPreview || !formData.platformId || !editingItem) return;
+  
+    const result = await connectFolioToIgdb(
+      igdbPreview, 
+      formData, 
+      editingItem._id
+    );
+  
+    if (result.success) {
+      setEditingItem(null);
+      setIgdbPreview(null);
+      setFormData({ igdbId: "", platform: "", platformId: null });
+      fetchOrphans();
+    } else {
+      alert(result.error);
+    }
   };
 
   const handleIgdbSearch = async () => {
@@ -56,6 +69,7 @@ export default function OrphansPage() {
     const result = await getGameById(formData.igdbId);
     if (result.success) {
       setIgdbPreview(result.data);
+      console.log(result.data);
     } else {
       alert(result.error);
       setIgdbPreview(null);

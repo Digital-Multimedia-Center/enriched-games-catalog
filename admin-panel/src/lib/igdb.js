@@ -33,7 +33,7 @@ export async function fetchGameFromIGDB(gameId) {
   const token = await getAccessToken();
 
   const query = `
-    fields name, summary, release_dates.human, cover.image_id, genres.name, platforms.name;
+    fields name, summary, first_release_date, category, platforms, status, game_type, rating, cover.image_id, genres.name;
     where id = ${gameId};
   `;
 
